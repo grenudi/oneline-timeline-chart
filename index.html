@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Цветная личинка</title>
+	<style>
+		.timeline-cell-label:{
+			background-color: black;
+			color: green !important;
+		}
+	</style>
+</head>
+<body>
+	<div id="lichina" style="color: red" width="500px"></div>
+
+	<script>
+		var Timeline = function(){
+			this.isntValid = function(template){//returns array of error strings
+				var errors = [];
+
+				var position = " relative absolute ";
+				if(!(position.includes(template.position)))
+					errors.push(`[!POSITION] Template's .position isn't specified (relative or absolute)! You've entered: >${template.position}<`);
+				var units = " width point ";
+				// if(!(units.includes(template.unit)))
+				// 	errors.push(`[!UNIT] Template's unit isn't specified (width or point)! You've entered: >${template.unit}<`);
+				if(!template.title || (typeof(template.title) !== "string"))
+					errors.push(`[!TITLE] No .title specified or it isn't a string: ${typeof(template.title)}`);
+				var listError = "";
+				if(!template.list || !(template.list instanceof Array))
+					errors.push(`[!LIST] No .list specified or it is empty: ${template.list}`);
+				else{
+					template.list.forEach(function(x,i){
+						var errorCell = `[${i}]:\n`;
+						if(typeof(x.label) !== "string"){
+							errorCell+=`.label isn't a string: ${typeof(x.lable)} \n`
+						}
+
+						listError+=errorCell;
+					});
+					if(listError.length > 0) errors.push("Errors in .list:\n"+listError);
+				}
+
+
+				//check elements
+				/*
+					ELEMENT
+					{
+						width int
+						background-color list
+						color
+						label string
+					}
+				*/
+				//fields etc
+
+				return errors.length ? errors : false;
+			};
+
+			this.render	 = function(template){//throws Error on wrong template format
+				function w(tag,content){return tag+content+tag.replace(/(?<=<\w+(?= )).+(?=>)/i,"")}
+				console.log(w(`<spin class="timeline-cell-label">`,`test`));
+
+				var list = template.list;
+				var percent = list.reduce(function(a,x){return (a.width | a) + x.width})/100 ;
+				var leach = [];
+				console.log(percent);
+
+
+				list.forEach(function(x,i){
+					leach.push(w(`<spin>`,w(`<spin class="timeline-cell-label">`,x.label)));
+				});
+				return leach.join("");
+			};
+
+		}
+		var timeline = new Timeline();
+		var options = {position: "relative"};
+		var list1 = {...options, title: "monday", list: 
+			[
+				{label: "label 1", color: "black", "background-color": "blue", width: 5},
+				{label: "label 3", color: "black", "background-color": "blue", width: 10},
+				{label: "label 2", color: "black", "background-color": "blue", width: 15}
+			]
+		}
+		var error = timeline.isntValid(list1)
+		console.warn(error);
+		document.getElementById("lichina").innerHTML = timeline.render(list1);
+		// timeline.render({abc:123});
+
+	</script>
+</body>
+</html>
